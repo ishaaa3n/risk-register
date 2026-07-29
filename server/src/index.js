@@ -18,7 +18,7 @@ app.use(cors(allowedOrigins.length ? { origin: allowedOrigins } : {}));
 app.use(express.json());
 // Filenames are random and unguessable; not gated behind requireAuth because
 // <img src> requests can't carry an Authorization header.
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'data', 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/assessments', assessmentRoutes);

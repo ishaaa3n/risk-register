@@ -16,7 +16,9 @@ import {
 } from '../constants.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+// Nested under data/ (alongside the SQLite file) so a single persistent disk
+// mounted at server/data covers both on hosts like Render.
+const uploadsDir = path.join(__dirname, '..', '..', 'data', 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
 const storage = multer.diskStorage({
