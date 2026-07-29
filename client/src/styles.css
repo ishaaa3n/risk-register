@@ -113,6 +113,7 @@ textarea { resize: vertical; font-weight: 400; }
 
 .alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; }
 .alert-error { background: rgba(208, 59, 59, 0.12); color: var(--status-critical); }
+.alert-success { background: rgba(12, 163, 12, 0.12); color: var(--status-good); }
 
 /* Form */
 .form-page { display: flex; justify-content: center; }
