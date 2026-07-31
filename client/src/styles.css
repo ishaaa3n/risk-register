@@ -340,9 +340,11 @@ textarea { resize: vertical; font-weight: 400; }
 .search-box input[type="search"] { padding-left: 32px; width: 100%; }
 .search-icon { position: absolute; left: 10px; color: var(--text-muted); pointer-events: none; }
 .table-scroll { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13.5px; table-layout: fixed; }
-th, td { text-align: left; padding: 14px 8px; border-bottom: 1px solid var(--gridline); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th, td { text-align: left; padding: 14px 8px; border-bottom: 1px solid var(--gridline); white-space: nowrap; }
 td.wrap-cell, th.wrap-cell { white-space: normal; }
+.assessments-table { table-layout: fixed; }
+.assessments-table th, .assessments-table td { overflow: hidden; text-overflow: ellipsis; }
 .assessments-table th:nth-child(1), .assessments-table td:nth-child(1) { width: 9%; }
 .assessments-table th:nth-child(2), .assessments-table td:nth-child(2) { width: 11%; }
 .assessments-table th:nth-child(3), .assessments-table td:nth-child(3) { width: 11%; }
@@ -371,13 +373,16 @@ tbody tr:hover { background: rgba(255,255,255,0.04); }
 
 .empty-state { color: var(--text-muted); text-align: center; padding: 20px; }
 
-.table-dense th, .table-dense td { padding: 8px 10px; font-size: 12px; }
+.table-dense td { padding: 10px 12px; font-size: 12.5px; white-space: nowrap; }
+.table-dense th { padding: 12px; white-space: nowrap; }
 .table-dense .wrap-cell { white-space: normal; min-width: 180px; max-width: 260px; }
 .sheet-view { max-width: 100%; }
 
 .table-scroll-sticky { max-height: 74vh; overflow: auto; }
 .table-scroll-sticky thead th {
-  position: sticky; top: 0; z-index: 2; background: var(--surface-1);
-  box-shadow: 0 1px 0 var(--gridline);
+  position: sticky; top: 0; z-index: 2;
+  background: var(--surface-2); color: var(--text-primary);
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  border-bottom: 2px solid var(--series-1);
 }
 .page-loading { padding: 60px; text-align: center; color: var(--text-muted); }
