@@ -20,7 +20,10 @@ function Shell({ children }) {
   return (
     <div className="shell">
       <header className="topbar">
-        <div className="brand">Risk Register</div>
+        <div className="brand">
+          <img src="/mondelez-logo.svg" alt="Mondelez" className="brand-logo" />
+          <span className="brand-name">Risk Register</span>
+        </div>
         {user && (
           <nav className="nav">
             <NavLink to="/dashboard" className={({ isActive }) => (isActive ? 'active' : '')}>Dashboard</NavLink>
