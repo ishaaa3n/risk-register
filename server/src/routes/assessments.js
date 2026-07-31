@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import db from '../db.js';
+import pool from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import {
   PROBABILITY_OPTIONS,
@@ -16,8 +16,8 @@ import {
 } from '../constants.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// Nested under data/ (alongside the SQLite file) so a single persistent disk
-// mounted at server/data covers both on hosts like Render.
+// Local disk only — not backed by a persistent volume, so uploaded photos can
+// be lost on redeploy/restart. Assessment data itself lives in Postgres.
 const uploadsDir = path.join(__dirname, '..', '..', 'data', 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
@@ -76,80 +76,94 @@ const FIELDS = [
   'hazard_description', 'probability', 'frequency', 'severity', 'people_exposed',
   'control_measure_description', 'effective', 'independent', 'auditable', 'control_measure'
 ];
+const INTEGER_FIELDS = new Set(['effective', 'independent', 'auditable']);
 
-router.get('/', (req, res) => {
-  const { department, risk_level, from, to, search } = req.query;
-  let sql = 'SELECT * FROM assessments WHERE 1=1';
-  const params = [];
-  if (department) {
-    sql += ' AND department = ?';
-    params.push(department);
+function fieldValues(body) {
+  return FIELDS.map((f) => {
+    const v = body[f] ?? null;
+    return INTEGER_FIELDS.has(f) && v !== null ? Number(v) : v;
+  });
+}
+
+router.get('/', async (req, res, next) => {
+  try {
+    const { department, risk_level, from, to, search } = req.query;
+    let sql = 'SELECT * FROM assessments WHERE 1=1';
+    const params = [];
+    if (department) {
+      params.push(department);
+      sql += ` AND department = $${params.length}`;
+    }
+    if (risk_level) {
+      params.push(risk_level);
+      sql += ` AND mitigated_risk_level = $${params.length}`;
+    }
+    if (from) {
+      params.push(from);
+      sql += ` AND assessment_date >= $${params.length}`;
+    }
+    if (to) {
+      params.push(to);
+      sql += ` AND assessment_date <= $${params.length}`;
+    }
+    if (search) {
+      const term = `%${search}%`;
+      params.push(term, term, term, term);
+      const [a, b, c, d] = [params.length - 3, params.length - 2, params.length - 1, params.length];
+      sql += ` AND (job_task ILIKE $${a} OR sub_task ILIKE $${b} OR hazard ILIKE $${c} OR area ILIKE $${d})`;
+    }
+    sql += ' ORDER BY assessment_date DESC, id DESC';
+    const { rows } = await pool.query(sql, params);
+    res.json(rows);
+  } catch (err) {
+    next(err);
   }
-  if (risk_level) {
-    sql += ' AND mitigated_risk_level = ?';
-    params.push(risk_level);
-  }
-  if (from) {
-    sql += ' AND assessment_date >= ?';
-    params.push(from);
-  }
-  if (to) {
-    sql += ' AND assessment_date <= ?';
-    params.push(to);
-  }
-  if (search) {
-    sql += ' AND (job_task LIKE ? OR sub_task LIKE ? OR hazard LIKE ? OR area LIKE ?)';
-    const term = `%${search}%`;
-    params.push(term, term, term, term);
-  }
-  sql += ' ORDER BY assessment_date DESC, id DESC';
-  const rows = db.prepare(sql).all(...params);
-  res.json(rows);
 });
 
-router.get('/:id', (req, res) => {
-  const row = db.prepare('SELECT * FROM assessments WHERE id = ?').get(req.params.id);
-  if (!row) return res.status(404).json({ error: 'Not found' });
-  res.json(row);
+router.get('/:id', async (req, res, next) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM assessments WHERE id = $1', [req.params.id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.post('/', upload.single('hazard_photo'), (req, res) => {
+router.post('/', upload.single('hazard_photo'), async (req, res) => {
   try {
     const derived = computeDerived(req.body);
-    const values = FIELDS.map((f) => req.body[f] ?? null);
+    const values = fieldValues(req.body);
     const photoPath = req.file ? `/uploads/${req.file.filename}` : null;
 
-    const stmt = db.prepare(`
-      INSERT INTO assessments (
-        ${FIELDS.join(', ')}, hazard_photo_path,
-        p_value, f_value, s_value, np_value, c_value,
-        unmitigated_rrn, unmitigated_risk_level, mitigated_rrn, mitigated_risk_level, valid_status,
-        created_by
-      ) VALUES (
-        ${FIELDS.map(() => '?').join(', ')}, ?,
-        ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, ?,
-        ?
-      )
-    `);
-    const info = stmt.run(
+    const insertFields = [
+      ...FIELDS, 'hazard_photo_path',
+      'p_value', 'f_value', 's_value', 'np_value', 'c_value',
+      'unmitigated_rrn', 'unmitigated_risk_level', 'mitigated_rrn', 'mitigated_risk_level', 'valid_status',
+      'created_by'
+    ];
+    const allValues = [
       ...values, photoPath,
       derived.p_value, derived.f_value, derived.s_value, derived.np_value, derived.c_value,
       derived.unmitigated_rrn, derived.unmitigated_risk_level, derived.mitigated_rrn, derived.mitigated_risk_level, derived.valid_status,
       req.user.id
-    );
-    const created = db.prepare('SELECT * FROM assessments WHERE id = ?').get(info.lastInsertRowid);
-    res.status(201).json(created);
+    ];
+    const placeholders = insertFields.map((_, i) => `$${i + 1}`).join(', ');
+    const sql = `INSERT INTO assessments (${insertFields.join(', ')}) VALUES (${placeholders}) RETURNING *`;
+
+    const { rows } = await pool.query(sql, allValues);
+    res.status(201).json(rows[0]);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-router.put('/:id', upload.single('hazard_photo'), (req, res) => {
-  const existing = db.prepare('SELECT * FROM assessments WHERE id = ?').get(req.params.id);
-  if (!existing) return res.status(404).json({ error: 'Not found' });
-
+router.put('/:id', upload.single('hazard_photo'), async (req, res) => {
   try {
+    const { rows: existingRows } = await pool.query('SELECT * FROM assessments WHERE id = $1', [req.params.id]);
+    const existing = existingRows[0];
+    if (!existing) return res.status(404).json({ error: 'Not found' });
+
     const derived = computeDerived(req.body);
     const photoPath = req.file ? `/uploads/${req.file.filename}` : existing.hazard_photo_path;
 
@@ -158,37 +172,41 @@ router.put('/:id', upload.single('hazard_photo'), (req, res) => {
       fs.unlink(oldPath, () => {});
     }
 
-    const setClause = FIELDS.map((f) => `${f} = ?`).join(', ');
-    const stmt = db.prepare(`
-      UPDATE assessments SET
-        ${setClause}, hazard_photo_path = ?,
-        p_value = ?, f_value = ?, s_value = ?, np_value = ?, c_value = ?,
-        unmitigated_rrn = ?, unmitigated_risk_level = ?, mitigated_rrn = ?, mitigated_risk_level = ?, valid_status = ?,
-        updated_at = datetime('now')
-      WHERE id = ?
-    `);
-    const values = FIELDS.map((f) => req.body[f] ?? null);
-    stmt.run(
+    const values = fieldValues(req.body);
+    const setFields = [
+      ...FIELDS, 'hazard_photo_path',
+      'p_value', 'f_value', 's_value', 'np_value', 'c_value',
+      'unmitigated_rrn', 'unmitigated_risk_level', 'mitigated_rrn', 'mitigated_risk_level', 'valid_status'
+    ];
+    const setValues = [
       ...values, photoPath,
       derived.p_value, derived.f_value, derived.s_value, derived.np_value, derived.c_value,
-      derived.unmitigated_rrn, derived.unmitigated_risk_level, derived.mitigated_rrn, derived.mitigated_risk_level, derived.valid_status,
-      req.params.id
-    );
-    const updated = db.prepare('SELECT * FROM assessments WHERE id = ?').get(req.params.id);
-    res.json(updated);
+      derived.unmitigated_rrn, derived.unmitigated_risk_level, derived.mitigated_rrn, derived.mitigated_risk_level, derived.valid_status
+    ];
+    const setClause = setFields.map((f, i) => `${f} = $${i + 1}`).join(', ');
+    const idParam = setValues.length + 1;
+    const sql = `UPDATE assessments SET ${setClause}, updated_at = now() WHERE id = $${idParam} RETURNING *`;
+
+    const { rows } = await pool.query(sql, [...setValues, req.params.id]);
+    res.json(rows[0]);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-router.delete('/:id', (req, res) => {
-  const existing = db.prepare('SELECT * FROM assessments WHERE id = ?').get(req.params.id);
-  if (!existing) return res.status(404).json({ error: 'Not found' });
-  if (existing.hazard_photo_path) {
-    fs.unlink(path.join(uploadsDir, path.basename(existing.hazard_photo_path)), () => {});
+router.delete('/:id', async (req, res, next) => {
+  try {
+    const { rows: existingRows } = await pool.query('SELECT * FROM assessments WHERE id = $1', [req.params.id]);
+    const existing = existingRows[0];
+    if (!existing) return res.status(404).json({ error: 'Not found' });
+    if (existing.hazard_photo_path) {
+      fs.unlink(path.join(uploadsDir, path.basename(existing.hazard_photo_path)), () => {});
+    }
+    await pool.query('DELETE FROM assessments WHERE id = $1', [req.params.id]);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
   }
-  db.prepare('DELETE FROM assessments WHERE id = ?').run(req.params.id);
-  res.status(204).end();
 });
 
 export default router;
