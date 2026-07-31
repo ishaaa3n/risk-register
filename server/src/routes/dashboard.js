@@ -55,12 +55,26 @@ router.get('/summary', async (req, res, next) => {
       GROUP BY month
       ORDER BY month ASC
     `);
-    const byMonth = byMonthResult.rows.map((r) => ({
+    const byMonthMap = Object.fromEntries(byMonthResult.rows.map((r) => [r.month, {
       month: r.month,
       count: Number(r.count),
       avg_unmitigated: Number(r.avg_unmitigated),
       avg_mitigated: Number(r.avg_mitigated)
-    }));
+    }]));
+    // Zero-fill months with no assessments so the trend/count charts don't
+    // draw a straight line across a gap and imply data that isn't there.
+    const byMonth = [];
+    const monthKeys = Object.keys(byMonthMap).sort();
+    if (monthKeys.length) {
+      let [y, m] = monthKeys[0].split('-').map(Number);
+      const [endY, endM] = monthKeys[monthKeys.length - 1].split('-').map(Number);
+      while (y < endY || (y === endY && m <= endM)) {
+        const key = `${y}-${String(m).padStart(2, '0')}`;
+        byMonth.push(byMonthMap[key] || { month: key, count: 0, avg_unmitigated: 0, avg_mitigated: 0 });
+        m += 1;
+        if (m > 12) { m = 1; y += 1; }
+      }
+    }
 
     const highRiskResult = await pool.query(`
       SELECT COUNT(*) AS n FROM assessments
