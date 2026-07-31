@@ -1,11 +1,13 @@
 import { useRef, useState } from 'react';
 
 const WIDTH = 640;
-const HEIGHT = 220;
-const PAD_L = 36;
+const HEIGHT = 280;
+const PAD_L = 40;
 const PAD_R = 12;
-const PAD_T = 12;
+const PAD_T = 16;
 const PAD_B = 28;
+
+const formatY = (v) => Math.round(v);
 
 // Single-series vertical column chart for a time series (one bar per month).
 export default function ColumnChart({ data, valueKey = 'count', color = 'var(--series-1)', emptyMessage = 'Not enough historical data yet.' }) {
@@ -38,7 +40,13 @@ export default function ColumnChart({ data, valueKey = 'count', color = 'var(--s
       >
         {Array.from({ length: gridLines + 1 }).map((_, i) => {
           const y = PAD_T + (innerH / gridLines) * i;
-          return <line key={i} x1={PAD_L} x2={WIDTH - PAD_R} y1={y} y2={y} className="grid-line" />;
+          const value = max - (max / gridLines) * i;
+          return (
+            <g key={i}>
+              <line x1={PAD_L} x2={WIDTH - PAD_R} y1={y} y2={y} className="grid-line" />
+              <text x={PAD_L - 8} y={y + 3} textAnchor="end" className="y-axis-label">{formatY(value)}</text>
+            </g>
+          );
         })}
         <line x1={PAD_L} x2={PAD_L} y1={PAD_T} y2={PAD_T + innerH} className="axis-line" />
         <line x1={PAD_L} x2={WIDTH - PAD_R} y1={PAD_T + innerH} y2={PAD_T + innerH} className="axis-line" />

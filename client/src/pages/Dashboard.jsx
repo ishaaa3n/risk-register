@@ -7,7 +7,7 @@ import ColumnChart from '../components/charts/ColumnChart.jsx';
 import { DEPARTMENTS, ALL_AREAS, RISK_LEVELS, VALID_STATUS_OPTIONS, RISK_LEVEL_STATUS } from '../constants.js';
 import {
   ClipboardIcon, AlertTriangleIcon, ShieldAlertIcon, TrendingDownIcon, SearchIcon,
-  Building2Icon, TriangleAlertIcon
+  Building2Icon, TriangleAlertIcon, EditIcon, TrashIcon
 } from '../components/icons.jsx';
 
 function StatTile({ label, value, status = 'info', icon: Icon }) {
@@ -163,18 +163,18 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div className="chart-card chart-card-wide">
+        <div className="chart-card">
           <h2>Average RRN Trend (Unmitigated vs Mitigated)</h2>
           <TrendChart
             data={summary.byMonth}
             series={[
-              { key: 'avg_unmitigated', label: 'Unmitigated', color: 'var(--series-1)' },
-              { key: 'avg_mitigated', label: 'Mitigated', color: 'var(--series-2)' }
+              { key: 'avg_unmitigated', label: 'Unmitigated', color: 'var(--status-critical)' },
+              { key: 'avg_mitigated', label: 'Mitigated', color: 'var(--status-good)' }
             ]}
           />
         </div>
 
-        <div className="chart-card chart-card-wide">
+        <div className="chart-card">
           <h2>Monthly Risk Assessment Count</h2>
           <ColumnChart data={summary.byMonth} valueKey="count" />
         </div>
@@ -244,8 +244,8 @@ export default function Dashboard() {
                   </td>
                   <td>{r.valid_status}</td>
                   <td className="row-actions">
-                    <Link to={`/edit/${r.id}`}>Edit</Link>
-                    <button className="link-danger" onClick={() => remove(r.id)}>Delete</button>
+                    <Link to={`/edit/${r.id}`} className="icon-btn" title="Edit" aria-label="Edit"><EditIcon /></Link>
+                    <button className="icon-btn icon-btn-danger" title="Delete" aria-label="Delete" onClick={() => remove(r.id)}><TrashIcon /></button>
                   </td>
                 </tr>
               ))}
