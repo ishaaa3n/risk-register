@@ -341,7 +341,7 @@ textarea { resize: vertical; font-weight: 400; }
 .search-icon { position: absolute; left: 10px; color: var(--text-muted); pointer-events: none; }
 .table-scroll { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-th, td { text-align: left; padding: 14px 8px; border-bottom: 1px solid var(--gridline); white-space: nowrap; }
+th, td { text-align: left; padding: 14px 8px; border-bottom: 1px solid var(--gridline); white-space: nowrap; vertical-align: middle; }
 td.wrap-cell, th.wrap-cell { white-space: normal; }
 .assessments-table { table-layout: fixed; }
 .assessments-table th, .assessments-table td { overflow: hidden; text-overflow: ellipsis; }
@@ -361,7 +361,7 @@ tbody tr:nth-child(even) { background: var(--page-plane); }
 tbody tr:hover { background: rgba(255,255,255,0.04); }
 .level-pill { padding: 3px 10px 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
 .level-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-.row-actions { display: flex; gap: 6px; }
+.row-actions { display: flex; align-items: center; gap: 6px; }
 .icon-btn {
   display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px;
   border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-secondary);
