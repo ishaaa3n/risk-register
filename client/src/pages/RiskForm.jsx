@@ -46,6 +46,35 @@ const initialState = {
 
 const ACTION_PLAN_THRESHOLD = 50;
 
+// Short, scannable text for dropdown options — the full canonical wording
+// (used as the actual stored value and shown as a hover tooltip) is long
+// enough that a dropdown full of them is hard to scan at a glance.
+const PROBABILITY_SHORT = {
+  'Never heard of in the industry OR Improbable': 'Never heard of / improbable',
+  'Heard in industry OR at risk': 'Heard in industry / at risk',
+  'Has happened in the organization': 'Happened in organization',
+  'Has happened more than once per year in the organization': '>1×/year in organization',
+  'Has happened in the location': 'Happened at this location',
+  'Has happened more than once per year at the location': '>1×/year at this location'
+};
+const SEVERITY_SHORT = {
+  'Minor injuries, scratch, bruise': 'Minor injury (scratch, bruise)',
+  'Cut (laceration), mild (usual disease)': 'Cut / laceration (mild)',
+  'Temporary disability (Body portion <9%)': 'Temp. disability (<9%)',
+  'Temporary disability (Body portion >9%) OR Occupational disease (temporary)': 'Temp. disability (>9%) / occ. disease',
+  'Permanent disability (Body portion <9%) OR loss of one eye OR occupational disease (permanent)': 'Perm. disability (<9%) / loss of one eye',
+  'Permanent disability (Body portion >9%) OR loss of two eyes OR Death causing occupational disease': 'Perm. disability (>9%) / loss of two eyes',
+  'Fatality': 'Fatality'
+};
+const CONTROL_MEASURE_SHORT = {
+  'Elimination': 'Elimination',
+  'Substitution': 'Substitution',
+  'Engineering control plus training and PPE as required': 'Engineering control + training/PPE',
+  'Administrative control OR Eng Controls that require Admin': 'Administrative / eng. control',
+  'PPE': 'PPE',
+  'None': 'None'
+};
+
 const STATUS_DOT = { good: '🟢', warning: '🟡', serious: '🟠', critical: '🔴', neutral: '⚪' };
 
 function RiskSummaryCard({ title, formula, rrn, level }) {
@@ -335,7 +364,10 @@ export default function RiskForm() {
                 value={form.probability}
                 onChange={update('probability')}
                 placeholder="Select…"
-                options={PROBABILITY_OPTIONS.map((o) => ({ value: o.label, label: `${o.label} (P=${o.value})` }))}
+                options={PROBABILITY_OPTIONS.map((o) => ({
+                  value: o.label, hint: o.label,
+                  label: `P=${o.value}   ${PROBABILITY_SHORT[o.label]}`
+                }))}
               />
             </label>
             <label>
@@ -344,7 +376,7 @@ export default function RiskForm() {
                 value={form.frequency}
                 onChange={update('frequency')}
                 placeholder="Select…"
-                options={FREQUENCY_OPTIONS.map((o) => ({ value: o.label, label: `${o.label} (F=${o.value})` }))}
+                options={FREQUENCY_OPTIONS.map((o) => ({ value: o.label, hint: o.label, label: `F=${o.value}   ${o.label}` }))}
               />
             </label>
             <label>
@@ -353,7 +385,10 @@ export default function RiskForm() {
                 value={form.severity}
                 onChange={update('severity')}
                 placeholder="Select…"
-                options={SEVERITY_OPTIONS.map((o) => ({ value: o.label, label: `${o.label} (S=${o.value})` }))}
+                options={SEVERITY_OPTIONS.map((o) => ({
+                  value: o.label, hint: o.label,
+                  label: `S=${o.value}   ${SEVERITY_SHORT[o.label]}`
+                }))}
               />
             </label>
             <label>
@@ -362,7 +397,7 @@ export default function RiskForm() {
                 value={form.people_exposed}
                 onChange={update('people_exposed')}
                 placeholder="Select…"
-                options={PEOPLE_EXPOSED_OPTIONS.map((o) => ({ value: o.label, label: `${o.label} (NP=${o.value})` }))}
+                options={PEOPLE_EXPOSED_OPTIONS.map((o) => ({ value: o.label, hint: o.label, label: `NP=${o.value}   ${o.label}` }))}
               />
             </label>
           </div>
@@ -423,7 +458,10 @@ export default function RiskForm() {
               value={form.control_measure}
               onChange={update('control_measure')}
               placeholder="Choose a control category"
-              options={CONTROL_MEASURE_OPTIONS.map((o) => ({ value: o.label, label: `${o.label} (C=${o.value})` }))}
+              options={CONTROL_MEASURE_OPTIONS.map((o) => ({
+                value: o.label, hint: o.label,
+                label: `C=${o.value}   ${CONTROL_MEASURE_SHORT[o.label]}`
+              }))}
             />
           </label>
 

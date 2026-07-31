@@ -69,7 +69,7 @@ export default function Select({ value, onChange, options, placeholder = 'Select
         onClick={() => setOpen((o) => !o)}
         onKeyDown={onKeyDown}
       >
-        <span className={selected ? 'ui-select-value' : 'ui-select-placeholder'}>
+        <span className={selected ? 'ui-select-value' : 'ui-select-placeholder'} title={selected?.hint || selected?.label}>
           {selected ? selected.label : placeholder}
         </span>
         <svg className="ui-select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -84,6 +84,7 @@ export default function Select({ value, onChange, options, placeholder = 'Select
               role="option"
               aria-selected={o.value === value}
               className={`ui-select-option ${i === activeIndex ? 'active' : ''} ${o.value === value ? 'selected' : ''}`}
+              title={o.hint || o.label}
               onMouseEnter={() => setActiveIndex(i)}
               onClick={() => commit(i)}
             >
