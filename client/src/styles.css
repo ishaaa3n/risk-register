@@ -379,6 +379,10 @@ tbody tr:hover { background: rgba(255,255,255,0.04); }
 .sheet-view { max-width: 100%; }
 
 .table-scroll-sticky { max-height: 74vh; overflow: auto; }
+/* border-collapse:collapse breaks sticky <th> rendering in some browsers
+   (scrolled row content bleeds through the header) — separate fixes it. */
+.table-scroll-sticky table { border-collapse: separate; border-spacing: 0; }
+.table-scroll-sticky td { border-bottom: 1px solid var(--gridline); }
 .table-scroll-sticky thead th {
   position: sticky; top: 0; z-index: 2;
   background: var(--surface-2); color: var(--text-primary);
