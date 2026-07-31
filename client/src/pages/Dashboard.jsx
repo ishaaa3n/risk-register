@@ -243,9 +243,11 @@ export default function Dashboard() {
                     </span>
                   </td>
                   <td>{r.valid_status}</td>
-                  <td className="row-actions">
-                    <Link to={`/edit/${r.id}`} className="icon-btn" title="Edit" aria-label="Edit"><EditIcon /></Link>
-                    <button className="icon-btn icon-btn-danger" title="Delete" aria-label="Delete" onClick={() => remove(r.id)}><TrashIcon /></button>
+                  <td>
+                    <div className="row-actions">
+                      <Link to={`/edit/${r.id}`} className="icon-btn" title="Edit" aria-label="Edit"><EditIcon /></Link>
+                      <button className="icon-btn icon-btn-danger" title="Delete" aria-label="Delete" onClick={() => remove(r.id)}><TrashIcon /></button>
+                    </div>
                   </td>
                 </tr>
               ))}
