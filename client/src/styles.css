@@ -151,14 +151,15 @@ textarea { resize: vertical; font-weight: 400; }
 .ui-select-trigger[aria-expanded="true"] .ui-select-chevron { transform: rotate(180deg); }
 
 .ui-select-menu {
-  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 50;
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 50;
+  min-width: 100%; width: max-content; max-width: min(360px, 90vw);
   background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45); padding: 7px; margin: 0; list-style: none;
-  max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;
+  max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;
 }
 .ui-select-option {
-  padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--text-secondary);
-  cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding: 9px 10px; border-radius: 6px; font-size: 13px; line-height: 1.4; color: var(--text-secondary);
+  cursor: pointer; white-space: normal; word-break: break-word;
   transition: background-color 150ms ease, color 150ms ease;
 }
 .ui-select-option.active { background: #2d3748; color: var(--text-primary); }
