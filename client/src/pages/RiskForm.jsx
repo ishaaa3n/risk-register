@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, resolveUploadUrl } from '../api.js';
+import Select from '../components/Select.jsx';
 import {
   DEPARTMENTS, AREAS_BY_DEPARTMENT, ROUTINE_OPTIONS, ACTIVITY_TYPE_OPTIONS,
   HAZARD_OPTIONS, PROBABILITY_OPTIONS, FREQUENCY_OPTIONS, SEVERITY_OPTIONS,
@@ -178,9 +179,22 @@ export default function RiskForm() {
 
   const setCriterion = (field) => (value) => setForm((f) => ({ ...f, [field]: value }));
 
+  const REQUIRED_SELECT_FIELDS = [
+    ['department', 'Department'], ['area', 'Area'], ['routine', 'Routine / Non-Routine'],
+    ['activity_type', 'Type of Activity'], ['hazard', 'Hazard'], ['probability', 'Probability'],
+    ['frequency', 'Frequency'], ['severity', 'Severity'], ['people_exposed', 'No. of People Exposed'],
+    ['control_measure', 'Control Measure Category']
+  ];
+
   const submit = async (e) => {
     e.preventDefault();
     setError('');
+
+    const missingSelect = REQUIRED_SELECT_FIELDS.find(([field]) => !form[field]);
+    if (missingSelect) {
+      setError(`Please select a value for "${missingSelect[1]}" before submitting.`);
+      return;
+    }
 
     const missingCriteria = CRITERIA.some(({ field }) => form[field] !== 0 && form[field] !== 1);
     if (missingCriteria) {
@@ -227,17 +241,22 @@ export default function RiskForm() {
             </label>
             <label>
               Department *
-              <select value={form.department} onChange={(e) => setForm((f) => ({ ...f, department: e.target.value, area: '' }))} required>
-                <option value="">Select department…</option>
-                {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
-              </select>
+              <Select
+                value={form.department}
+                onChange={(e) => setForm((f) => ({ ...f, department: e.target.value, area: '' }))}
+                placeholder="Select department…"
+                options={DEPARTMENTS.map((d) => ({ value: d, label: d }))}
+              />
             </label>
             <label>
               Area *
-              <select value={form.area} onChange={update('area')} required disabled={!form.department}>
-                <option value="">Select area…</option>
-                {areaOptions.map((a) => <option key={a} value={a}>{a}</option>)}
-              </select>
+              <Select
+                value={form.area}
+                onChange={update('area')}
+                placeholder="Select area…"
+                disabled={!form.department}
+                options={areaOptions.map((a) => ({ value: a, label: a }))}
+              />
             </label>
             {form.area === OTHER && (
               <label>
@@ -269,17 +288,11 @@ export default function RiskForm() {
             </label>
             <label>
               Routine / Non-Routine *
-              <select value={form.routine} onChange={update('routine')} required>
-                <option value="">Select…</option>
-                {ROUTINE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
+              <Select value={form.routine} onChange={update('routine')} placeholder="Select…" options={ROUTINE_OPTIONS.map((o) => ({ value: o, label: o }))} />
             </label>
             <label>
               Type of Activity *
-              <select value={form.activity_type} onChange={update('activity_type')} required>
-                <option value="">Select…</option>
-                {ACTIVITY_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
+              <Select value={form.activity_type} onChange={update('activity_type')} placeholder="Select…" options={ACTIVITY_TYPE_OPTIONS.map((o) => ({ value: o, label: o }))} />
             </label>
           </div>
         </section>
@@ -289,10 +302,7 @@ export default function RiskForm() {
           <div className="grid-2">
             <label>
               Hazard *
-              <select value={form.hazard} onChange={update('hazard')} required>
-                <option value="">Select hazard…</option>
-                {HAZARD_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
+              <Select value={form.hazard} onChange={update('hazard')} placeholder="Select hazard…" options={HAZARD_OPTIONS.map((o) => ({ value: o, label: o }))} />
             </label>
             {form.hazard === OTHER && (
               <label>
@@ -321,31 +331,39 @@ export default function RiskForm() {
           <div className="grid-4">
             <label>
               Probability *
-              <select value={form.probability} onChange={update('probability')} required>
-                <option value="">Select…</option>
-                {PROBABILITY_OPTIONS.map((o) => <option key={o.label} value={o.label}>{o.label} (P={o.value})</option>)}
-              </select>
+              <Select
+                value={form.probability}
+                onChange={update('probability')}
+                placeholder="Select…"
+                options={PROBABILITY_OPTIONS.map((o) => ({ value: o.label, label: `${o.label} (P=${o.value})` }))}
+              />
             </label>
             <label>
               Frequency *
-              <select value={form.frequency} onChange={update('frequency')} required>
-                <option value="">Select…</option>
-                {FREQUENCY_OPTIONS.map((o) => <option key={o.label} value={o.label}>{o.label} (F={o.value})</option>)}
-              </select>
+              <Select
+                value={form.frequency}
+                onChange={update('frequency')}
+                placeholder="Select…"
+                options={FREQUENCY_OPTIONS.map((o) => ({ value: o.label, label: `${o.label} (F=${o.value})` }))}
+              />
             </label>
             <label>
               Severity *
-              <select value={form.severity} onChange={update('severity')} required>
-                <option value="">Select…</option>
-                {SEVERITY_OPTIONS.map((o) => <option key={o.label} value={o.label}>{o.label} (S={o.value})</option>)}
-              </select>
+              <Select
+                value={form.severity}
+                onChange={update('severity')}
+                placeholder="Select…"
+                options={SEVERITY_OPTIONS.map((o) => ({ value: o.label, label: `${o.label} (S=${o.value})` }))}
+              />
             </label>
             <label>
               No. of People Exposed *
-              <select value={form.people_exposed} onChange={update('people_exposed')} required>
-                <option value="">Select…</option>
-                {PEOPLE_EXPOSED_OPTIONS.map((o) => <option key={o.label} value={o.label}>{o.label} (NP={o.value})</option>)}
-              </select>
+              <Select
+                value={form.people_exposed}
+                onChange={update('people_exposed')}
+                placeholder="Select…"
+                options={PEOPLE_EXPOSED_OPTIONS.map((o) => ({ value: o.label, label: `${o.label} (NP=${o.value})` }))}
+              />
             </label>
           </div>
           <RiskSummaryCard title="Unmitigated Risk" formula="F × S × P × NP" rrn={derived.unmitigatedRrn} level={derived.unmitigatedLevel} />
@@ -401,10 +419,12 @@ export default function RiskForm() {
 
           <label>
             Control Measure Category *
-            <select value={form.control_measure} onChange={update('control_measure')} required>
-              <option value="">Choose a control category</option>
-              {CONTROL_MEASURE_OPTIONS.map((o) => <option key={o.label} value={o.label}>{o.label} (C={o.value})</option>)}
-            </select>
+            <Select
+              value={form.control_measure}
+              onChange={update('control_measure')}
+              placeholder="Choose a control category"
+              options={CONTROL_MEASURE_OPTIONS.map((o) => ({ value: o.label, label: `${o.label} (C=${o.value})` }))}
+            />
           </label>
 
           <div className="section-divider" />

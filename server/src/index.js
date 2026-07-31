@@ -7,6 +7,7 @@ import 'dotenv/config';
 import authRoutes from './routes/auth.js';
 import assessmentRoutes from './routes/assessments.js';
 import dashboardRoutes from './routes/dashboard.js';
+import publicRoutes from './routes/public.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -23,6 +24,7 @@ app.use('/uploads', express.static(path.join(__dirname, '..', 'data', 'uploads')
 app.use('/api/auth', authRoutes);
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/public', publicRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

@@ -128,6 +128,43 @@ select:focus { outline: none; border-color: var(--series-1); }
 textarea { resize: vertical; font-weight: 400; }
 .hint { color: var(--text-muted); font-weight: 400; }
 
+/* Custom Select (components/Select.jsx) — native <select> popups can't be
+   styled (menu background, padding, per-option hover/selected) in any
+   browser, so filter/form dropdowns use this instead of a real <select>. */
+.ui-select { position: relative; }
+.ui-select-trigger {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; height: 42px; padding: 0 12px; border-radius: 8px;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary);
+  font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; text-align: left;
+  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+}
+.ui-select-trigger:hover { border-color: var(--baseline); background: var(--surface-1); }
+.ui-select-trigger:focus-visible {
+  outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+}
+.ui-select-trigger:disabled { opacity: 0.5; cursor: not-allowed; }
+.ui-select-trigger:disabled:hover { border-color: var(--border); background: var(--surface-2); }
+.ui-select-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ui-select-placeholder { color: #9ca3af; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ui-select-chevron { color: var(--text-muted); flex-shrink: 0; transition: transform 200ms ease; }
+.ui-select-trigger[aria-expanded="true"] .ui-select-chevron { transform: rotate(180deg); }
+
+.ui-select-menu {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 50;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45); padding: 7px; margin: 0; list-style: none;
+  max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;
+}
+.ui-select-option {
+  padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--text-secondary);
+  cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.ui-select-option.active { background: #2d3748; color: var(--text-primary); }
+.ui-select-option.selected { background: #2563eb; color: #ffffff; }
+.ui-select-option.selected.active { background: #2563eb; }
+
 .alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; }
 .alert-error { background: rgba(208, 59, 59, 0.12); color: var(--status-critical); }
 
@@ -330,12 +367,10 @@ textarea { resize: vertical; font-weight: 400; }
   background: var(--page-plane); border: 1px solid var(--border); border-radius: 10px; padding: 6px;
 }
 @media (max-width: 1100px) { .filters { flex-wrap: wrap; } }
-.filters input, .filters select { background: var(--surface-1); width: auto; flex: 0 1 auto; }
-.filters select {
-  min-width: 130px; min-height: 38px; padding: 8px 30px 8px 12px; border-radius: 8px;
-  border-color: var(--baseline); font-weight: 500; font-size: 13px;
-}
-.filters select:hover { background: var(--surface-2); border-color: var(--series-1); }
+.filters input { background: var(--surface-1); width: auto; flex: 0 1 auto; }
+.filters .filter-select { flex: 0 1 170px; min-width: 140px; }
+.filters .filter-select .ui-select-trigger { height: 38px; background: var(--surface-1); border-color: var(--baseline); }
+.filters .filter-select .ui-select-trigger:hover { background: var(--surface-2); border-color: var(--series-1); }
 .search-box { position: relative; display: flex; align-items: center; flex: 1 1 200px; min-width: 160px; }
 .search-box input[type="search"] { padding-left: 32px; width: 100%; }
 .search-icon { position: absolute; left: 10px; color: var(--text-muted); pointer-events: none; }

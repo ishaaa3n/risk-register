@@ -63,6 +63,7 @@ export default function App() {
           <Route path="/new" element={<RequireAuth><RiskForm /></RequireAuth>} />
           <Route path="/edit/:id" element={<RequireAuth><RiskForm /></RequireAuth>} />
           <Route path="/register" element={<RequireAuth><SheetView /></RequireAuth>} />
+          <Route path="/public/register" element={<SheetView isPublic />} />
           <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
         </Routes>
       </Shell>

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
+import Select from '../components/Select.jsx';
 import { DEPARTMENTS, RISK_LEVEL_STATUS } from '../constants.js';
 
 const yesNo = (v) => (v === 1 ? 'Yes' : 'No');
 const resolved = (value, other) => (value === 'Other (To specify)' ? (other || 'Other') : value);
 
-export default function SheetView() {
+export default function SheetView({ isPublic = false }) {
   const [rows, setRows] = useState([]);
   const [department, setDepartment] = useState('');
   const [search, setSearch] = useState('');
@@ -15,7 +16,8 @@ export default function SheetView() {
 
   const load = () => {
     setLoading(true);
-    api.listAssessments({ department, search })
+    const fetcher = isPublic ? api.publicAssessments : api.listAssessments;
+    fetcher({ department, search })
       .then(setRows)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -28,8 +30,8 @@ export default function SheetView() {
   return (
     <div className="sheet-view">
       <div className="dashboard-header">
-        <h1>Risk Register — Full Sheet View</h1>
-        <Link to="/dashboard" className="btn-ghost">Back to Dashboard</Link>
+        <h1>Risk Register — Full Sheet View{isPublic ? ' (Public, view-only)' : ''}</h1>
+        <Link to={isPublic ? '/login' : '/dashboard'} className="btn-ghost">{isPublic ? 'Log In' : 'Back to Dashboard'}</Link>
       </div>
 
       <div className="table-card">
@@ -42,10 +44,12 @@ export default function SheetView() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <select value={department} onChange={(e) => setDepartment(e.target.value)}>
-              <option value="">All departments</option>
-              {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
+            <Select
+              className="filter-select"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              options={[{ value: '', label: 'All departments' }, ...DEPARTMENTS.map((d) => ({ value: d, label: d }))]}
+            />
           </div>
         </div>
 
@@ -88,7 +92,6 @@ export default function SheetView() {
                   <th>Mitigated Risk Level</th>
                   <th>Immediate Action Plan</th>
                   <th>Team Members</th>
-                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -134,11 +137,10 @@ export default function SheetView() {
                     </td>
                     <td className="wrap-cell">{r.immediate_action_plan || '—'}</td>
                     <td className="wrap-cell">{r.team_members}</td>
-                    <td><Link to={`/edit/${r.id}`}>Edit</Link></td>
                   </tr>
                 ))}
                 {rows.length === 0 && (
-                  <tr><td colSpan={32} className="empty-state">No assessments match these filters.</td></tr>
+                  <tr><td colSpan={31} className="empty-state">No assessments match these filters.</td></tr>
                 )}
               </tbody>
             </table>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
+import Select from '../components/Select.jsx';
 import BarChart from '../components/charts/BarChart.jsx';
 import TrendChart from '../components/charts/TrendChart.jsx';
 import ColumnChart from '../components/charts/ColumnChart.jsx';
@@ -193,22 +194,30 @@ export default function Dashboard() {
                 onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
               />
             </div>
-            <select value={filters.department} onChange={(e) => setFilters((f) => ({ ...f, department: e.target.value }))}>
-              <option value="">All departments</option>
-              {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
-            <select value={filters.area} onChange={(e) => setFilters((f) => ({ ...f, area: e.target.value }))}>
-              <option value="">All areas</option>
-              {ALL_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
-            </select>
-            <select value={filters.risk_level} onChange={(e) => setFilters((f) => ({ ...f, risk_level: e.target.value }))}>
-              <option value="">All risk levels</option>
-              {RISK_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
-            <select value={filters.valid_status} onChange={(e) => setFilters((f) => ({ ...f, valid_status: e.target.value }))}>
-              <option value="">Valid + Not valid</option>
-              {VALID_STATUS_OPTIONS.map((v) => <option key={v} value={v}>{v}</option>)}
-            </select>
+            <Select
+              className="filter-select"
+              value={filters.department}
+              onChange={(e) => setFilters((f) => ({ ...f, department: e.target.value }))}
+              options={[{ value: '', label: 'All departments' }, ...DEPARTMENTS.map((d) => ({ value: d, label: d }))]}
+            />
+            <Select
+              className="filter-select"
+              value={filters.area}
+              onChange={(e) => setFilters((f) => ({ ...f, area: e.target.value }))}
+              options={[{ value: '', label: 'All areas' }, ...ALL_AREAS.map((a) => ({ value: a, label: a }))]}
+            />
+            <Select
+              className="filter-select"
+              value={filters.risk_level}
+              onChange={(e) => setFilters((f) => ({ ...f, risk_level: e.target.value }))}
+              options={[{ value: '', label: 'All risk levels' }, ...RISK_LEVELS.map((l) => ({ value: l, label: l }))]}
+            />
+            <Select
+              className="filter-select"
+              value={filters.valid_status}
+              onChange={(e) => setFilters((f) => ({ ...f, valid_status: e.target.value }))}
+              options={[{ value: '', label: 'Valid + Not valid' }, ...VALID_STATUS_OPTIONS.map((v) => ({ value: v, label: v }))]}
+            />
           </div>
         </div>
         <div className="table-scroll">

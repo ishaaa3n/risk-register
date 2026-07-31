@@ -64,5 +64,9 @@ export const api = {
   createAssessment: (formData) => request('/assessments', { method: 'POST', body: formData }),
   updateAssessment: (id, formData) => request(`/assessments/${id}`, { method: 'PUT', body: formData }),
   deleteAssessment: (id) => request(`/assessments/${id}`, { method: 'DELETE' }),
-  dashboardSummary: () => request('/dashboard/summary')
+  dashboardSummary: () => request('/dashboard/summary'),
+  publicAssessments: (params = {}) => {
+    const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v)).toString();
+    return request(`/public/assessments${qs ? `?${qs}` : ''}`);
+  }
 };
