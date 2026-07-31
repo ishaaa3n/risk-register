@@ -212,7 +212,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="table-scroll">
-          <table>
+          <table className="assessments-table">
             <thead>
               <tr>
                 <th>Date</th>

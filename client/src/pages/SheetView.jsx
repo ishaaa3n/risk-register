@@ -52,7 +52,7 @@ export default function SheetView() {
         {loading ? (
           <div className="page-loading">Loading…</div>
         ) : (
-          <div className="table-scroll">
+          <div className="table-scroll table-scroll-sticky">
             <table className="table-dense">
               <thead>
                 <tr>
