@@ -192,6 +192,9 @@ textarea { resize: vertical; font-weight: 400; }
 .valid-chip.status-warning { background: rgba(250,178,25,0.16); color: #8a5a00; }
 .valid-chip.status-critical { background: rgba(208,59,59,0.12); color: var(--status-critical); }
 
+.action-plan-section { border-color: rgba(208,59,59,0.4); border-left: 3px solid var(--status-critical); }
+.action-plan-hint { margin: -4px 0 4px; font-size: 13px; color: var(--status-critical); }
+
 .section-divider { height: 1px; background: var(--gridline); margin: 6px 0; }
 
 /* Dashboard */
@@ -278,7 +281,7 @@ textarea { resize: vertical; font-weight: 400; }
   border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 4px solid var(--text-primary);
 }
 
-.trend-chart { position: relative; }
+.trend-chart, .column-chart { position: relative; }
 .trend-svg { width: 100%; height: 220px; }
 .grid-line { stroke: var(--gridline); stroke-width: 1; }
 .axis-line { stroke: var(--baseline); stroke-width: 1; }
@@ -317,4 +320,8 @@ tbody tr:hover { background: var(--page-plane); }
 .row-actions a { color: var(--series-1); text-decoration: none; }
 
 .empty-state { color: var(--text-muted); text-align: center; padding: 20px; }
+
+.table-dense th, .table-dense td { padding: 8px 10px; font-size: 12px; }
+.table-dense .wrap-cell { white-space: normal; min-width: 180px; max-width: 260px; }
+.sheet-view { max-width: 100%; }
 .page-loading { padding: 60px; text-align: center; color: var(--text-muted); }

@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { api } from '../api.js';
 import BarChart from '../components/charts/BarChart.jsx';
 import TrendChart from '../components/charts/TrendChart.jsx';
-import { DEPARTMENTS, RISK_LEVEL_STATUS } from '../constants.js';
+import ColumnChart from '../components/charts/ColumnChart.jsx';
+import { DEPARTMENTS, ALL_AREAS, RISK_LEVELS, VALID_STATUS_OPTIONS, RISK_LEVEL_STATUS } from '../constants.js';
 import {
   ClipboardIcon, AlertTriangleIcon, ShieldAlertIcon, TrendingDownIcon, SearchIcon,
   Building2Icon, TriangleAlertIcon
@@ -59,7 +60,7 @@ function ViewToggle({ view, onChange }) {
 export default function Dashboard() {
   const [summary, setSummary] = useState(null);
   const [rows, setRows] = useState([]);
-  const [filters, setFilters] = useState({ department: '', risk_level: '', search: '' });
+  const [filters, setFilters] = useState({ department: '', area: '', risk_level: '', valid_status: '', search: '' });
   const [chartView, setChartView] = useState('department');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -74,7 +75,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadRows();
-  }, [filters.department, filters.risk_level, filters.search]);
+  }, [filters.department, filters.area, filters.risk_level, filters.valid_status, filters.search]);
 
   const remove = async (id) => {
     if (!window.confirm('Delete this risk assessment? This cannot be undone.')) return;
@@ -172,6 +173,11 @@ export default function Dashboard() {
             ]}
           />
         </div>
+
+        <div className="chart-card chart-card-wide">
+          <h2>Monthly Risk Assessment Count</h2>
+          <ColumnChart data={summary.byMonth} valueKey="count" />
+        </div>
       </div>
 
       <div className="table-card">
@@ -191,6 +197,18 @@ export default function Dashboard() {
               <option value="">All departments</option>
               {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
+            <select value={filters.area} onChange={(e) => setFilters((f) => ({ ...f, area: e.target.value }))}>
+              <option value="">All areas</option>
+              {ALL_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+            </select>
+            <select value={filters.risk_level} onChange={(e) => setFilters((f) => ({ ...f, risk_level: e.target.value }))}>
+              <option value="">All risk levels</option>
+              {RISK_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+            <select value={filters.valid_status} onChange={(e) => setFilters((f) => ({ ...f, valid_status: e.target.value }))}>
+              <option value="">Valid + Not valid</option>
+              {VALID_STATUS_OPTIONS.map((v) => <option key={v} value={v}>{v}</option>)}
+            </select>
           </div>
         </div>
         <div className="table-scroll">
@@ -202,6 +220,7 @@ export default function Dashboard() {
                 <th>Area</th>
                 <th>Job/Task</th>
                 <th>Hazard</th>
+                <th>Unmitigated RRN</th>
                 <th>Mitigated RRN</th>
                 <th>Risk Level</th>
                 <th>Valid</th>
@@ -216,6 +235,7 @@ export default function Dashboard() {
                   <td>{r.area === 'Other (To specify)' ? r.area_other : r.area}</td>
                   <td>{r.job_task}</td>
                   <td>{r.hazard === 'Other (To specify)' ? r.hazard_other : r.hazard}</td>
+                  <td>{r.unmitigated_rrn.toFixed(2)}</td>
                   <td>{r.mitigated_rrn.toFixed(2)}</td>
                   <td>
                     <span className={`level-pill status-${RISK_LEVEL_STATUS[r.mitigated_risk_level] || 'good'}`}>
@@ -230,7 +250,7 @@ export default function Dashboard() {
                 </tr>
               ))}
               {rows.length === 0 && (
-                <tr><td colSpan={9} className="empty-state">No assessments match these filters.</td></tr>
+                <tr><td colSpan={10} className="empty-state">No assessments match these filters.</td></tr>
               )}
             </tbody>
           </table>

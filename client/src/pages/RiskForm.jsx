@@ -39,8 +39,11 @@ const initialState = {
   effective: null,
   independent: null,
   auditable: null,
-  control_measure: ''
+  control_measure: '',
+  immediate_action_plan: ''
 };
+
+const ACTION_PLAN_THRESHOLD = 50;
 
 const STATUS_DOT = { good: '🟢', warning: '🟡', serious: '🟠', critical: '🔴', neutral: '⚪' };
 
@@ -129,7 +132,8 @@ export default function RiskForm() {
         effective: row.effective,
         independent: row.independent,
         auditable: row.auditable,
-        control_measure: row.control_measure
+        control_measure: row.control_measure,
+        immediate_action_plan: row.immediate_action_plan || ''
       });
       setExistingPhotoUrl(row.hazard_photo_path);
       setLoading(false);
@@ -407,6 +411,26 @@ export default function RiskForm() {
 
           <RiskSummaryCard title="Mitigated Risk" formula="Unmitigated RRN × Control Factor" rrn={derived.mitigatedRrn} level={derived.mitigatedLevel} />
         </section>
+
+        {derived.mitigatedRrn > ACTION_PLAN_THRESHOLD && (
+          <section className="form-section action-plan-section">
+            <h2>6. Immediate Action Plan</h2>
+            <p className="action-plan-hint">
+              ⚠ Mitigated Risk Score is {derived.mitigatedRrn.toFixed(2)}, above the {ACTION_PLAN_THRESHOLD} threshold.
+              Describe the immediate action plan for this risk before it can be submitted.
+            </p>
+            <label>
+              Immediate Action Plan *
+              <textarea
+                rows={3}
+                value={form.immediate_action_plan}
+                onChange={update('immediate_action_plan')}
+                placeholder="Example: Stop the task, isolate the equipment, and notify the shift supervisor within 24 hours."
+                required
+              />
+            </label>
+          </section>
+        )}
 
         <div className="form-actions">
           <button type="button" className="btn-ghost" onClick={() => navigate('/dashboard')}>Cancel</button>

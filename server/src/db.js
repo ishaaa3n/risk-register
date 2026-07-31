@@ -69,6 +69,8 @@ CREATE TABLE IF NOT EXISTS assessments (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE assessments ADD COLUMN IF NOT EXISTS immediate_action_plan TEXT;
 `);
 
 export default pool;

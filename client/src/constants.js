@@ -16,6 +16,19 @@ export const AREAS_BY_DEPARTMENT = {
   'Utilities': ['ETP & RWH', 'Boiler', 'Solar Area', 'Powerhouse 1', 'Powerhouse 2', 'Other (To specify)']
 };
 
+export const ALL_AREAS = [...new Set(Object.values(AREAS_BY_DEPARTMENT).flat())];
+
+export const RISK_LEVELS = [
+  'Very Low',
+  'Low',
+  'Medium (acceptable)',
+  'Medium (consider controls)',
+  'High (consider stopping task and implement interim controls)',
+  'Unacceptable (stop task and implement interim controls)'
+];
+
+export const VALID_STATUS_OPTIONS = ['Valid', 'Not valid'];
+
 export const ROUTINE_OPTIONS = ['Routine', 'Non-Routine'];
 
 export const ACTIVITY_TYPE_OPTIONS = ['manual', 'process'];

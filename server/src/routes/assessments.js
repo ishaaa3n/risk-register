@@ -74,7 +74,8 @@ const FIELDS = [
   'assessment_date', 'department', 'area', 'area_other', 'team_members', 'sub_area',
   'job_task', 'sub_task', 'routine', 'activity_type', 'hazard', 'hazard_other',
   'hazard_description', 'probability', 'frequency', 'severity', 'people_exposed',
-  'control_measure_description', 'effective', 'independent', 'auditable', 'control_measure'
+  'control_measure_description', 'effective', 'independent', 'auditable', 'control_measure',
+  'immediate_action_plan'
 ];
 const INTEGER_FIELDS = new Set(['effective', 'independent', 'auditable']);
 
@@ -87,16 +88,24 @@ function fieldValues(body) {
 
 router.get('/', async (req, res, next) => {
   try {
-    const { department, risk_level, from, to, search } = req.query;
+    const { department, risk_level, from, to, search, area, valid_status } = req.query;
     let sql = 'SELECT * FROM assessments WHERE 1=1';
     const params = [];
     if (department) {
       params.push(department);
       sql += ` AND department = $${params.length}`;
     }
+    if (area) {
+      params.push(area);
+      sql += ` AND area = $${params.length}`;
+    }
     if (risk_level) {
       params.push(risk_level);
       sql += ` AND mitigated_risk_level = $${params.length}`;
+    }
+    if (valid_status) {
+      params.push(valid_status);
+      sql += ` AND valid_status = $${params.length}`;
     }
     if (from) {
       params.push(from);
